@@ -1,0 +1,83 @@
+---
+title: "p8105_hw2_wm2473"
+output: github_document
+date: "2022-10-01"
+---
+
+```{r setup}
+library(tidyverse)
+library(readxl)
+```
+
+## Problem 1
+
+```{r}
+trans_ent = 
+  read_csv(
+    "data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv",
+    col_types = cols(Route8 = "c", Route9 = "c", Route10 = "c", Route11 = "c")) %>% 
+  janitor::clean_names() %>% 
+  select(
+    line, station_name, station_latitude, station_longitude, 
+    starts_with("route"), entry, exit_only, vending, entrance_type, 
+    ada) %>% 
+  mutate(entry = ifelse(entry == "YES", TRUE, FALSE))
+```
+
+##Short paragraph about the dataset These data are not tidy. Route number should be a variable, as should route. That is, to obtain a tidy dataset we would need to convert `route` variables from wide to long format. This will be useful when focusing on specific routes, but may not be necessary when considering questions that focus on station-level variables.
+
+```{r}
+trans_ent %>% 
+  select(station_name, line) %>% 
+  distinct
+```
+
+## From this chunk, we can know that the number of rows are the same as the number of unique stations is 465.
+
+```{r}
+trans_ent %>% 
+  filter(ada == TRUE) %>% 
+  select(station_name, line) %>% 
+  distinct
+```
+
+## There are 84 stations are ADA compliant.
+
+```{r}
+trans_ent %>% 
+  filter(vending == "NO") %>% 
+  pull(entry) %>% 
+  mean
+```
+
+## The porprotion will be 0.377.
+
+```{r}
+  trans_ent %>% 
+  pivot_longer(
+    route1:route11,
+    names_to = "route_num",
+    values_to = "route") %>% 
+  filter(route == "A") %>% 
+  select(station_name, line) %>% 
+  distinct
+
+trans_ent %>% 
+  pivot_longer(
+    route1:route11,
+    names_to = "route_num",
+    values_to = "route") %>% 
+  filter(route == "A", ada == TRUE) %>% 
+  select(station_name, line) %>% 
+  distinct
+```
+
+## The distinct stations serve A train are 60 and 17 are ADA compliant.
+
+
+
+##Problem 2
+```{r}
+
+```
+
