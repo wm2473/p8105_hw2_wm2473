@@ -22,9 +22,10 @@ trans_ent =
     starts_with("route"), entry, exit_only, vending, entrance_type, 
     ada) %>% 
   mutate(entry = ifelse(entry == "YES", TRUE, FALSE))
+
+#Short paragraph about the dataset: These data are not tidy. Route number should be a variable, as should route. That is, to obtain a tidy dataset we would need to convert "route" variables from wide to long format.
 ```
 
-##Short paragraph about the dataset These data are not tidy. Route number should be a variable, as should route. That is, to obtain a tidy dataset we would need to convert `route` variables from wide to long format. This will be useful when focusing on specific routes, but may not be necessary when considering questions that focus on station-level variables.
 
 ```{r}
 trans_ent %>% 
@@ -76,8 +77,107 @@ trans_ent %>%
 
 
 
-##Problem 2
-```{r}
+# Problem 2
 
+# Mr. Trash Wheel sheet clean up.
+```{r}
+trash_wheel = 
+  read_excel(
+    "data/Trash Wheel Collection Data.xlsx" )%>%
+  janitor::clean_names() %>% 
+  drop_na(dumpster) %>% 
+  mutate(sports_balls =as.integer(sports_balls),
+         sports_balls= round(sports_balls),
+         table_name = "trash_wheel",
+         year = as.numeric(year),
+         dumpster = as.character(dumpster)) %>% 
+  select(-x15,-x16)
+
+##Descript dataset: Cleaning the Trash Wheel Collection dataset, dropping the NA of dumpster, changing the sports_balls character to integer and also input one column called "trash_wheel" used to join the sheet later. There is 547 observations and 15 variables in the sheet.
+``` 
+
+```{r}
+trash_wheel2 =  filter(trash_wheel, year==2020) 
+sum(trash_wheel2$sports_balls)
+
+#The total number of sports ball collected by Mr. Trash Wheel is 856.
+```
+
+# Professor Trash Wheel clean up.
+```{r}
+Professor_trash_wheel =   
+  read_excel(
+    "data/Trash Wheel Collection Data.xlsx", sheet = 2) %>% 
+  janitor::clean_names() %>% 
+  drop_na(dumpster) %>% 
+  mutate(homes_powered = round(homes_powered,digits = 2),
+         dumpster = as.character(dumpster),
+         year = as.numeric(year),
+         table_name = "Professor_trash_wheel") 
+sum(Professor_trash_wheel$weight_tons)
+
+
+##Descript dataset: Cleaning the Professor trash wheel Collection dataset, dropping the NA of dumpster, round the home_powered to two digits number and also input one column called "Professor_trash_wheel" used to join the sheet later. The sum of the weight_tons is 190.12. There is 94 observations and 14 variables in the sheet.  
+```
+
+```{r}
+join_table = full_join(trash_wheel,Professor_trash_wheel, copy = FALSE)
+## There are 15 variables and 641 observations. Key variables example I provided are dumpster, month, year, date, weight_tons, volumn_cubic_yards.The total weight of trash collected by Professor Trash Wheel is 190.12. The total number of sports ball collected by Mr. Trash Wheel is 856.
+```
+
+
+
+## Problem 3
+# Clean the pols_month dataset.
+```{r}
+pols_month = read_csv("data/fivethirtyeight_datasets/fivethirtyeight_datasets/pols-month.csv") %>% 
+  separate(mon, into = c("year", "month", "day"), sep = "-") %>%
+  mutate(month =  month.abb [as.numeric(month)]) %>% 
+  pivot_longer(starts_with("prez"),
+               names_prefix = "prez_",
+               names_to = "president", 
+               values_to = "num") %>% 
+  mutate(num =as.numeric(num)) %>% 
+  filter(num != 0 ) %>% 
+  select(-day,-num)
+# This dataset we create a new column president, separate the "mon" into year, month and day. And I filter the num column, keeping the 1 and 2 in the list. So my dataset is just include the president and the type of president dem or gov.
+```
+
+
+```{r}
+library(stringr)
+```
+
+```{r}
+snp = read_csv("data/fivethirtyeight_datasets/fivethirtyeight_datasets/snp.csv") %>% 
+  janitor::clean_names() %>%
+  mutate(date=lubridate::mdy(date)) %>% 
+  separate(date, into = c("year", "month", "day"), convert= TRUE) %>% 
+   mutate(month =  month.abb [as.numeric(month)], year = ifelse(as.numeric(year)<=2022, as.numeric(year), as.numeric(year)-100), year = as.character(year)) %>% 
+  arrange(year, month)
+
+snp
+```
+
+```{r}
+unemployment = read_csv("data/fivethirtyeight_datasets/fivethirtyeight_datasets/unemployment.csv") %>% 
+  janitor::clean_names() %>% 
+  na.omit() %>% 
+  pivot_longer(jan:dec,
+               names_to = "month",
+               values_to = "output") %>%
+  mutate(month = str_to_title(month))
+unemployment
+```
+
+# join datasets "snp"&"pols", and merge unemployment into the results
+```{r}
+join_datasets = right_join(pols_month,snp, copy = FALSE)
+final_join = merge(join_datasets, unemployment)
+
+
+##Write a short paragraph about these datasets. Explain briefly what each dataset contained, and describe the resulting dataset (e.g. give the dimension, range of years, and names of key variables).
+
+#For the first dataset pol_month, it contain lots of column. The key variable will be year, month, president and the type of party they belong to. The range of year is 1947 to 2015. It has 9 variables and 822 observations. The second dataset snp, it contains the key variables year, month, day and close. The range of year 1950 to 2015. It contain 4 variables and 787 observations.  The key variable of third dataset unemployment, it contains year, mon and output. The range of year is 1948 to 2014. It has 3 variables and 804 observations. After the combining and merging, the final join_datasets contains year, month, president, num, day, close and value. It contain 12 variables and 780 observations. The range of year from 1950 to 2014. 
 ```
 
