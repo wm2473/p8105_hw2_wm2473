@@ -1,6 +1,6 @@
 ---
 title: "p8105_hw2_wm2473"
-output: github_document
+output: "github_document"
 date: "2022-10-01"
 ---
 
@@ -12,7 +12,7 @@ library(readxl)
 ## Problem 1
 
 ```{r}
-trans_ent = 
+transpotation = 
   read_csv(
     "data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv",
     col_types = cols(Route8 = "c", Route9 = "c", Route10 = "c", Route11 = "c")) %>% 
@@ -23,38 +23,41 @@ trans_ent =
     ada) %>% 
   mutate(entry = ifelse(entry == "YES", TRUE, FALSE))
 
-#Short paragraph about the dataset: These data are not tidy. Route number should be a variable, as should route. That is, to obtain a tidy dataset we would need to convert "route" variables from wide to long format.
+#Short paragraph about the dataset: These data are not tidy. Route number should be a variable, as should route. That is, to obtain a tidy dataset we would need to convert "route" variables from wide to long format. We cleaned and selected the data that we needed like "line", "station_name", "station_latitude", station_longtitude and so on. And we change the variable in entry from yes and no to TRUE OR FALSE.
 ```
 
 
 ```{r}
-trans_ent %>% 
+transpotation %>% 
   select(station_name, line) %>% 
   distinct
+## From this chunk, we can know that the number of rows are the same as the number of unique stations is 465.
 ```
 
-## From this chunk, we can know that the number of rows are the same as the number of unique stations is 465.
+
 
 ```{r}
-trans_ent %>% 
+transpotation %>% 
   filter(ada == TRUE) %>% 
   select(station_name, line) %>% 
   distinct
+## There are 84 stations are ADA compliant.
 ```
 
-## There are 84 stations are ADA compliant.
+
 
 ```{r}
-trans_ent %>% 
+transpotation %>% 
   filter(vending == "NO") %>% 
   pull(entry) %>% 
   mean
+## The porprotion will be 0.377.
 ```
 
-## The porprotion will be 0.377.
+
 
 ```{r}
-  trans_ent %>% 
+  transpotation %>% 
   pivot_longer(
     route1:route11,
     names_to = "route_num",
@@ -63,7 +66,7 @@ trans_ent %>%
   select(station_name, line) %>% 
   distinct
 
-trans_ent %>% 
+transpotation %>% 
   pivot_longer(
     route1:route11,
     names_to = "route_num",
@@ -71,11 +74,10 @@ trans_ent %>%
   filter(route == "A", ada == TRUE) %>% 
   select(station_name, line) %>% 
   distinct
-```
 
 ## The distinct stations serve A train are 60 and 17 are ADA compliant.
 
-
+```
 
 # Problem 2
 
@@ -145,6 +147,7 @@ pols_month = read_csv("data/fivethirtyeight_datasets/fivethirtyeight_datasets/po
 
 
 ```{r}
+# library for the capital changing
 library(stringr)
 ```
 
