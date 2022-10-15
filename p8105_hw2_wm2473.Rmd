@@ -159,6 +159,7 @@ snp = read_csv("data/fivethirtyeight_datasets/fivethirtyeight_datasets/snp.csv")
    mutate(month =  month.abb [as.numeric(month)], year = ifelse(as.numeric(year)<=2022, as.numeric(year), as.numeric(year)-100), year = as.character(year)) %>% 
   arrange(year, month)
 
+
 snp
 ```
 
